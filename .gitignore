@@ -2,8 +2,6 @@
 models/pretrained/*
 data/features/*
 data/annotations/*
-data/raw/*
-!data/raw/.gitkeep
 !data/features/.gitkeep
 !data/annotations/.gitkeep
 !models/pretrained/.gitkeep

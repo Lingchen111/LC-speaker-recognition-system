@@ -18,7 +18,7 @@ def test_official_verifier():
         
         # 定义音频文件对
         test_pairs = [
-            ("test3.wav", "test4.wav")
+            ("test1.wav", "test4.wav")
         ]
         
         # 检查文件是否存在
