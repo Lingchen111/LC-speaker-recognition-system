@@ -17,6 +17,7 @@ LC-speaker recognition system/
 │   └── recognition/          # 说话人识别模块
 │       ├── __init__.py
 │       └── speaker_recognizer.py  # 说话人识别器实现
+├── app_gradio.py             # Gradio 前端应用
 ├── test_official.py          # 官方方法测试脚本
 ├── requirements.txt          # 依赖项
 ├── LICENSE                   # 许可证
@@ -29,6 +30,7 @@ LC-speaker recognition system/
 - **预训练模型**：自动从 Hugging Face Hub 下载 `speechbrain/spkrec-ecapa-voxceleb` 模型
 - **配置灵活**：通过配置文件调整阈值等参数
 - **简单易用**：提供简洁的 API 接口
+- **Web 界面**：提供基于 Gradio 的美观 Web 界面，支持文件上传和语音录制
 
 ## 安装依赖
 
@@ -37,6 +39,22 @@ pip install -r requirements.txt
 ```
 
 ## 快速开始
+
+### 使用 Gradio Web 界面（推荐）
+
+项目提供了美观的 Gradio Web 界面，支持文件上传和语音录制：
+
+```bash
+python app_gradio.py
+```
+
+启动后在浏览器中访问 `http://127.0.0.1:7867 即可使用。
+
+**界面功能：**
+- 支持上传 WAV 音频文件
+- 支持通过浏览器直接录制语音
+- 实时显示验证结果（验证状态、相似度、阈值）
+- 美观的用户界面
 
 ### 使用测试脚本
 

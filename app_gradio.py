@@ -1,50 +1,28 @@
-import gradio as gr
 import os
+os.environ["GRADIO_ANALYTICS_ENABLED"] = "false"
+os.environ["GRADIO_TELEMETRY_OPTOUT"] = "true"
+import gradio as gr
 import tempfile
 import soundfile as sf
 import numpy as np
 from pathlib import Path
+from src.recognition.speaker_recognizer import SpeakerRecognizer
 import logging
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 全局变量，用于存储识别器
-recognizer = None
-model_loaded = False
-
-def load_model():
-    """加载模型"""
-    global recognizer, model_loaded
-    
-    if model_loaded:
-        return "✅ 模型已加载", gr.update(interactive=False), gr.update(interactive=True)
-    
-    try:
-        logger.info("正在初始化模型...")
-        from src.recognition.speaker_recognizer import SpeakerRecognizer
-        
-        logger.info("正在加载模型...")
-        recognizer = SpeakerRecognizer("configs/config.yaml")
-        model_loaded = True
-        
-        logger.info("✅ 模型加载成功！")
-        return "✅ 模型加载成功！", gr.update(interactive=False), gr.update(interactive=True)
-        
-    except Exception as e:
-        logger.error(f"❌ 模型加载失败: {str(e)}")
-        import traceback
-        logger.error(traceback.format_exc())
-        return f"❌ 模型加载失败: {str(e)}", gr.update(interactive=True), gr.update(interactive=False)
+# 初始化说话人识别器
+try:
+    recognizer = SpeakerRecognizer("configs/config.yaml")
+    logger.info("✅ 模型加载成功！")
+except Exception as e:
+    logger.error(f"❌ 模型加载失败: {str(e)}")
+    raise
 
 def verify_speakers(audio1, audio2):
     """验证两个音频是否为同一说话人"""
-    global recognizer, model_loaded
-    
-    if not model_loaded or recognizer is None:
-        return None, None, None, "请先点击 '加载模型' 按钮"
-    
     try:
         # 处理音频文件
         if audio1 is None or audio2 is None:
@@ -161,13 +139,6 @@ def main():
             border-radius: 10px !important;
             margin-top: 20px !important;
         }
-        .model-status {
-            padding: 10px !important;
-            border-radius: 8px !important;
-            margin-bottom: 20px !important;
-            text-align: center !important;
-            font-weight: bold !important;
-        }
         """
     ) as app:
         # 标题区域
@@ -179,24 +150,6 @@ def main():
             </div>
             """)
         
-        # 模型加载区域
-        with gr.Row():
-            with gr.Column():
-                model_status = gr.Textbox(
-                    value="⏳ 等待加载模型...",
-                    label="模型状态",
-                    interactive=False,
-                    show_label=True,
-                    elem_classes="model-status"
-                )
-        
-        with gr.Row():
-            load_model_btn = gr.Button(
-                "📥 加载模型", 
-                variant="secondary", 
-                size="lg"
-            )
-        
         # 使用说明 - 放在可折叠区域
         with gr.Accordion("📖 使用说明", open=False):
             gr.Markdown("""
@@ -206,15 +159,9 @@ def main():
             2. **通过浏览器直接录制语音**
             
             ### 操作步骤
-            1. 点击 "加载模型" 按钮（首次运行需要下载模型）
-            2. 选择两个音频输入（上传文件或录制语音）
-            3. 点击 "验证说话人" 按钮
-            4. 查看验证结果
-            
-            ### 注意事项
-            - 首次运行需要从 HuggingFace Hub 下载模型（约100MB）
-            - 请确保网络连接正常
-            - 音频文件最好使用 16kHz 采样率的 WAV 格式
+            1. 选择两个音频输入（上传文件或录制语音）
+            2. 点击 "验证说话人" 按钮
+            3. 查看验证结果
             """)
         
         gr.Markdown("---")
@@ -244,8 +191,7 @@ def main():
                 "✨ 验证说话人", 
                 variant="primary", 
                 size="lg",
-                scale=1,
-                interactive=False
+                scale=1
             )
         
         gr.Markdown("---")
@@ -287,13 +233,6 @@ def main():
                     show_label=True
                 )
         
-        # 加载模型事件
-        load_model_btn.click(
-            fn=load_model,
-            inputs=[],
-            outputs=[model_status, load_model_btn, submit_btn]
-        )
-        
         # 点击事件
         submit_btn.click(
             fn=verify_speakers,
@@ -304,8 +243,11 @@ def main():
     # 启动界面
     app.launch(
         server_name="127.0.0.1",
-        server_port=7868,
-        share=False
+        server_port=7867,
+        share=False,
+        show_error=True,
+        quiet=False,
+        prevent_thread_lock=False
     )
 
 if __name__ == "__main__":

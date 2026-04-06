@@ -1,5 +1,5 @@
 # 预训练模型和数据文件
-models/pretrained/*
+# models/pretrained/*  # 现在允许提交预训练模型
 data/features/*
 data/annotations/*
 !data/features/.gitkeep
